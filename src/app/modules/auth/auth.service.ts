@@ -171,6 +171,8 @@ const forgetPasswordFromDB = async (email: string) => {
 
   const resetPassLink = `${config?.reset_pass_link}?email=${isUser.email}&token=${resetToken}`;
 
+  const subject = "Reset Password";
+
   const emailHtml = `
   <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
     <div style="max-width: 600px; margin: auto; background-color: #fff; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
@@ -187,7 +189,7 @@ const forgetPasswordFromDB = async (email: string) => {
     </div>
   </div>
 `;
-  await sendEmail(isUser?.email, emailHtml);
+  await sendEmail(isUser?.email, subject, emailHtml);
 };
 
 const resetPasswordFromDB = async (
