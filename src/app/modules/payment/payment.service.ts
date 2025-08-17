@@ -1,4 +1,5 @@
 import config from "../../config";
+import sendEmail from "../../utilities/sendEmail";
 import { PAYMENT_STATUS } from "../order/order.interface";
 import { Order } from "../order/order.model";
 import { verifyPayment } from "./payment.utils";
@@ -12,8 +13,8 @@ const confirmPaymentIntoDB = async (transactionId: string, status: string) => {
       {
         paymentStatus: PAYMENT_STATUS.PAID,
       },
-      { new: true }
-    );
+      { new: true, runValidators: true }
+    ).populate("user", "name email");
   }
 
   const successTemplate = `
@@ -71,8 +72,6 @@ const confirmPaymentIntoDB = async (transactionId: string, status: string) => {
       </body>
     </html>
   `;
-
-  console.log("tem", successTemplate);
 
   return successTemplate;
 };

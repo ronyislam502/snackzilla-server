@@ -88,6 +88,7 @@ const updateFoodIntoDB = async (
     new: true,
     runValidators: true,
   });
+
   return result;
 };
 
