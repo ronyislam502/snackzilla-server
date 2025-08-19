@@ -4,9 +4,5 @@ dist
 .vercel
 
 
-# git remote add origin https://github.com/ronyislam502/car-fixed-server.git
+# git remote add origin https://github.com/ronyislam502/snackzilla-server.git
 
-# https://car-fixed-server.vercel.app/
-.vercel
-
-.vercel
