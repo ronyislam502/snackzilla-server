@@ -7,7 +7,6 @@ const sendEmail = async (email: string, subject: string, html: string) => {
     port: 587,
     secure: config.NODE_ENV === "production",
     auth: {
-      // TODO: replace `user` and `pass` values from <https://forwardemail.net>
       user: config.sender_email,
       pass: config.sender_app_password,
     },
@@ -16,9 +15,9 @@ const sendEmail = async (email: string, subject: string, html: string) => {
   await transporter.sendMail({
     from: '"SnackZilla" <ronyislam502@gmail.com>', // sender address
     to: email,
-    subject, // Subject line
-    text: "", // plain text body
-    html, // html body
+    subject,
+    text: "",
+    html,
   });
 };
 

@@ -4,6 +4,8 @@ import cors from "cors";
 import router from "./app/routes";
 import notFound from "./app/middlewares/notFound";
 import globalErrorHandler from "./app/middlewares/globalErrorHandler";
+import { OrderServices } from "./app/modules/order/order.service";
+import cron from "node-cron";
 
 const app: Application = express();
 
@@ -15,6 +17,14 @@ app.use(
     credentials: true,
   })
 );
+
+cron.schedule("*/5 * * * *", async () => {
+  try {
+    await OrderServices.cancelUnpaidOrdersFromDB();
+  } catch (err) {
+    console.error("Error in cron job:", err);
+  }
+});
 
 app.use("/api", router);
 

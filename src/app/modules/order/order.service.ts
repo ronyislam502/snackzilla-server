@@ -5,7 +5,6 @@ import { ORDER_STATUS, PAYMENT_STATUS, TOrder } from "./order.interface";
 import { Order } from "./order.model";
 import { Food } from "../food/food.model";
 import { User } from "../user/user.model";
-import { TPayment } from "../payment/payment.interface";
 import { initiatePayment } from "../payment/payment.utils";
 
 const createOrderIntoDB = async (payload: TOrder) => {
@@ -38,7 +37,7 @@ const createOrderIntoDB = async (payload: TOrder) => {
     const tax = parseFloat((totalPrice * 0.1).toFixed(2));
     const grandAmount = totalPrice + tax;
 
-    const transactionId = `SnackZilla${Date.now()}`;
+    const transactionId = `SZ${Date.now()}`;
 
     const order = new Order({
       user,
@@ -131,7 +130,6 @@ const myOrdersByEmail = async (
       .populate("user", "name email phone")
       .populate({
         path: "foods.food",
-        select: "name image",
         populate: {
           path: "category",
           model: "Category",
@@ -152,10 +150,32 @@ const myOrdersByEmail = async (
   return { meta, data };
 };
 
+const cancelUnpaidOrdersFromDB = async () => {
+  const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000);
+  console.log(tenMinAgo);
+
+  const result = await Order.updateMany(
+    {
+      paymentStatus: PAYMENT_STATUS.PENDING,
+      status: ORDER_STATUS.PENDING,
+      createdAt: { $lt: tenMinAgo },
+    },
+    {
+      $set: {
+        status: ORDER_STATUS.CANCELLED,
+        paymentStatus: PAYMENT_STATUS.CANCELED,
+      },
+    }
+  );
+
+  return result;
+};
+
 export const OrderServices = {
   createOrderIntoDB,
   allOrdersFromDB,
   singleOrderFromDB,
   updateOrderIntoDB,
   myOrdersByEmail,
+  cancelUnpaidOrdersFromDB,
 };

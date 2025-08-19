@@ -22,7 +22,7 @@ export const initiatePayment = async (paymentData: TPayment) => {
       tran_id: paymentData?.transactionId,
       success_url: `${config?.live_url_server}/api/payments/confirm?transactionId=${paymentData?.transactionId}&status=success`,
       fail_url: `${config?.live_url_server}/api/payments/confirm?status=failed`,
-      cancel_url: "https://sandbox.aamarpay.com/jsonpost.php",
+      cancel_url: config.client_live_url_page,
       desc: "Merchant Registration Payment",
       amount: paymentData?.grandAmount,
       currency: "BDT",
@@ -54,8 +54,6 @@ export const verifyPayment = async (transactionId: string) => {
       type: "json",
     },
   });
-
-  console.log("data", response.data);
 
   return response?.data;
 };
