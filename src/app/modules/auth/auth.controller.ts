@@ -10,12 +10,12 @@ const loginUser = catchAsync(async (req, res) => {
 
   const { accessToken, user, refreshToken } = result;
 
-  res.cookie("accessToken", accessToken, {
-    secure: config.NODE_ENV === "production",
-    httpOnly: true,
-    sameSite: config.NODE_ENV === "production" ? "none" : "lax",
-    maxAge: 15 * 60 * 1000,
-  });
+  // res.cookie("accessToken", accessToken, {
+  //   secure: config.NODE_ENV === "production",
+  //   httpOnly: true,
+  //   sameSite: config.NODE_ENV === "production" ? "none" : "lax",
+  //   maxAge: 15 * 60 * 1000,
+  // });
 
   res.cookie("refreshToken", refreshToken, {
     secure: config.NODE_ENV === "production",
@@ -27,7 +27,7 @@ const loginUser = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "User logged in successfully",
+    message: `${user?.name} logged in successfully`,
 
     data: {
       user,

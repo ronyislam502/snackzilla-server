@@ -40,7 +40,7 @@ const allFoodsByCategory = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Foods retrieved successfully",
+    message: "Categories Foods retrieved successfully",
     meta: result.meta,
     data: result.data,
   });
@@ -53,7 +53,7 @@ const singleFood = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Foods retrieved successfully",
+    message: "Food retrieved successfully",
     data: result,
   });
 });

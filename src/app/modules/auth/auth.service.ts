@@ -52,6 +52,7 @@ const changePasswordIntoDB = async (
   userData: JwtPayload,
   payload: { oldPassword: string; newPassword: string }
 ) => {
+  console.log("userData", userData);
   // checking if the user is exist
   const user = await User.isUserExistsByEmail(userData.email);
 

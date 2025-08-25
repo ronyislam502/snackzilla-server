@@ -8,9 +8,14 @@ interface DashboardFilter {
   categoryId?: string;
 }
 
-export const AdminStatisticsFromDB = async (filter: DashboardFilter) => {
-  //  Base match for orders
+const calculateProgress = (current: number, prev: number) => {
+  if (prev > 0) return ((current - prev) / prev) * 100;
+  if (current > 0) return 100;
+  return 0;
+};
 
+const AdminStatisticsFromDB = async (filter: DashboardFilter) => {
+  // ==== Base Match ====
   const match: any = {
     status: {
       $in: [
@@ -28,7 +33,7 @@ export const AdminStatisticsFromDB = async (filter: DashboardFilter) => {
     match.createdAt = { $gte: filter.startDate, $lte: filter.endDate };
   }
 
-  //  Order status counts
+  // ==== Order Status Counts ====
   const rawOrderStatusCounts = await Order.aggregate([
     { $match: match },
     { $group: { _id: "$status", count: { $sum: 1 } } },
@@ -48,8 +53,7 @@ export const AdminStatisticsFromDB = async (filter: DashboardFilter) => {
     orderStatusCounts[status] = found ? found.count : 0;
   });
 
-  // Revenue calculations (exclude CANCELLED & REFUNDED)
-
+  // ==== Revenue Calculations (exclude CANCELLED & REFUNDED) ====
   const revenueData = await Order.aggregate([
     {
       $match: {
@@ -69,9 +73,93 @@ export const AdminStatisticsFromDB = async (filter: DashboardFilter) => {
     },
   ]);
 
-  // Category-wise sales
+  // ==== Daily Revenue + Progress ====
+  const dailyRevenue = await Order.aggregate([
+    {
+      $match: {
+        ...match,
+        status: { $nin: ["CANCELLED"] },
+        paymentStatus: { $ne: "REFUNDED" },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          day: { $dayOfMonth: "$createdAt" },
+          month: { $month: "$createdAt" },
+          year: { $year: "$createdAt" },
+        },
+        totalRevenue: { $sum: "$grandAmount" },
+      },
+    },
+    { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } },
+  ]);
 
-  const categoryWise = await Order.aggregate([
+  const dailyWithProgress = dailyRevenue.map((day, idx) => {
+    if (idx === 0) return { ...day, progress: 0 };
+    const prevRevenue = dailyRevenue[idx - 1].totalRevenue || 0;
+    return {
+      ...day,
+      progress: calculateProgress(day.totalRevenue, prevRevenue),
+    };
+  });
+
+  // ==== Monthly Revenue + Progress ====
+  const monthlyRevenue = await Order.aggregate([
+    {
+      $match: {
+        ...match,
+        status: { $nin: ["CANCELLED"] },
+        paymentStatus: { $ne: "REFUNDED" },
+      },
+    },
+    {
+      $group: {
+        _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
+        totalRevenue: { $sum: "$grandAmount" },
+      },
+    },
+    { $sort: { "_id.year": 1, "_id.month": 1 } },
+  ]);
+
+  const monthlyWithProgress = monthlyRevenue.map((month, idx) => {
+    if (idx === 0) return { ...month, progress: 0 };
+    const prevRevenue = monthlyRevenue[idx - 1].totalRevenue || 0;
+    return {
+      ...month,
+      progress: calculateProgress(month.totalRevenue, prevRevenue),
+    };
+  });
+
+  // ==== Yearly Revenue + Progress ====
+  const yearlyRevenue = await Order.aggregate([
+    {
+      $match: {
+        ...match,
+        status: { $nin: ["CANCELLED"] },
+        paymentStatus: { $ne: "REFUNDED" },
+      },
+    },
+    {
+      $group: {
+        _id: { year: { $year: "$createdAt" } },
+        totalRevenue: { $sum: "$grandAmount" },
+      },
+    },
+    { $sort: { "_id.year": 1 } },
+  ]);
+
+  const yearlyWithProgress = yearlyRevenue.map((year, idx) => {
+    if (idx === 0) return { ...year, progress: 0 };
+    const prevRevenue = yearlyRevenue[idx - 1].totalRevenue || 0;
+    return {
+      ...year,
+      progress: calculateProgress(year.totalRevenue, prevRevenue),
+    };
+  });
+
+  // ==== Category-wise sales ====
+  const categoryWiseRaw = await Order.aggregate([
     {
       $match: {
         ...match,
@@ -113,10 +201,20 @@ export const AdminStatisticsFromDB = async (filter: DashboardFilter) => {
         },
       },
     },
+    { $sort: { totalRevenue: -1 } }, // Highest selling category first
   ]);
 
-  // Food-wise sales
-  const foodWise = await Order.aggregate([
+  const categoryWise = categoryWiseRaw.map((cat, idx) => {
+    if (idx === 0) return { ...cat, progress: 0 };
+    const prevRevenue = categoryWiseRaw[idx - 1].totalRevenue || 0;
+    return {
+      ...cat,
+      progress: calculateProgress(cat.totalRevenue, prevRevenue),
+    };
+  });
+
+  // ==== Food-wise sales ====
+  const foodWiseRaw = await Order.aggregate([
     {
       $match: {
         ...match,
@@ -159,10 +257,25 @@ export const AdminStatisticsFromDB = async (filter: DashboardFilter) => {
         },
       },
     },
+    { $sort: { totalRevenue: -1 } }, // Highest selling food first
   ]);
+
+  const foodWise = foodWiseRaw.map((food, idx) => {
+    if (idx === 0) return { ...food, progress: 0 };
+    const prevRevenue = foodWiseRaw[idx - 1].totalRevenue || 0;
+    return {
+      ...food,
+      progress: calculateProgress(food.totalRevenue, prevRevenue),
+    };
+  });
+
+  // ==== Return All Stats ====
   return {
     orderStatusCounts,
-    revenueData,
+    revenueData: revenueData[0] || {},
+    dailyRevenue: dailyWithProgress,
+    monthlyRevenue: monthlyWithProgress,
+    yearlyRevenue: yearlyWithProgress,
     categoryWise,
     foodWise,
   };
@@ -177,6 +290,7 @@ export const UserStatisticsFromDB = async (
   email: string,
   filter: UserDashboardFilter
 ) => {
+  console.log("user", email);
   const user = await User.findOne({ email: email }).lean();
   if (!user) {
     throw new Error("User not found");
