@@ -1,12 +1,12 @@
 import httpStatus from "http-status";
 import AppError from "../../errors/AppError";
 import { User } from "../user/user.model";
-import { TReview } from "./review.interface";
 import { Order } from "../order/order.model";
-import { Review } from "./review.model";
 import QueryBuilder from "../../builder/queryBuilder";
+import { TServiceReview } from "./serviceReview.interface";
+import { ServiceReview } from "./serviceReview.model";
 
-const createReviewIntoDB = async (payload: TReview) => {
+const createServiceReviewIntoDB = async (payload: TServiceReview) => {
   const isUser = await User.findById(payload?.user);
 
   if (!isUser) {
@@ -19,14 +19,14 @@ const createReviewIntoDB = async (payload: TReview) => {
     throw new AppError(httpStatus.NOT_FOUND, "Order not found");
   }
 
-  const result = await Review.create(payload);
+  const result = await ServiceReview.create(payload);
 
   return result;
 };
 
-const getAllReviewsFromDB = async (query: Record<string, unknown>) => {
+const getAllServiceReviewsFromDB = async (query: Record<string, unknown>) => {
   const reviewsQuery = new QueryBuilder(
-    Review.find().populate("user").populate("order"),
+    ServiceReview.find().populate("user").populate("order"),
     query
   )
     .paginate()
@@ -42,7 +42,16 @@ const getAllReviewsFromDB = async (query: Record<string, unknown>) => {
   return { meta, data, averageRating, totalRatings };
 };
 
-const updateReviewIntoDB = async (id: string, payload: Partial<TReview>) => {
+const updateServiceReviewIntoDB = async (
+  id: string,
+  payload: Partial<TServiceReview>
+) => {
+  const isServiceReview = await ServiceReview.findById(id);
+
+  if (!isServiceReview) {
+    throw new AppError(httpStatus.NOT_FOUND, "ServiceReview not found");
+  }
+
   const isUser = await User.findById(payload?.user);
 
   if (!isUser) {
@@ -55,16 +64,20 @@ const updateReviewIntoDB = async (id: string, payload: Partial<TReview>) => {
     throw new AppError(httpStatus.NOT_FOUND, "Order not found");
   }
 
-  const result = await Review.findByIdAndUpdate(isOrder._id, payload, {
-    new: true,
-    runValidators: true,
-  });
+  const result = await ServiceReview.findByIdAndUpdate(
+    isServiceReview?._id,
+    payload,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
 
   return result;
 };
 
-export const ReviewServices = {
-  createReviewIntoDB,
-  getAllReviewsFromDB,
-  updateReviewIntoDB,
+export const ServiceReviewServices = {
+  createServiceReviewIntoDB,
+  getAllServiceReviewsFromDB,
+  updateServiceReviewIntoDB,
 };

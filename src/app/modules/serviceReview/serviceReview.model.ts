@@ -1,7 +1,7 @@
 import { model, Schema } from "mongoose";
-import { TReview } from "./review.interface";
+import { TServiceReview } from "./serviceReview.interface";
 
-const CategorySchema = new Schema<TReview>(
+const ServiceReviewSchema = new Schema<TServiceReview>(
   {
     user: {
       type: Schema.Types.ObjectId,
@@ -25,4 +25,7 @@ const CategorySchema = new Schema<TReview>(
   { timestamps: true }
 );
 
-export const Review = model<TReview>("Review", CategorySchema);
+export const ServiceReview = model<TServiceReview>(
+  "ServiceReview",
+  ServiceReviewSchema
+);
