@@ -12,4 +12,4 @@ router.get("/", ServiceReviewControllers.allServiceReviews);
 
 router.patch("/update/:id", ServiceReviewControllers.updateServiceReview);
 
-export const ReviewRoutes = router;
+export const ServiceReviewRoutes = router;

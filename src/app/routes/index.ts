@@ -6,7 +6,8 @@ import { FoodRoutes } from "../modules/food/food.route";
 import { OrderRoutes } from "../modules/order/order.route";
 import { PaymentRoutes } from "../modules/payment/payment.route";
 import { DashboardRoutes } from "../modules/dashboard/dashboard.route";
-import { ReviewRoutes } from "../modules/serviceReview/serviceReview.route";
+import { ServiceReviewRoutes } from "../modules/serviceReview/serviceReview.route";
+import { FoodReviewRoutes } from "../modules/foodReview/foodReview.route";
 
 const router = Router();
 
@@ -36,8 +37,12 @@ const moduleRoutes = [
     route: PaymentRoutes,
   },
   {
-    path: "/reviews",
-    route: ReviewRoutes,
+    path: "/service-reviews",
+    route: ServiceReviewRoutes,
+  },
+  {
+    path: "/food-reviews",
+    route: FoodReviewRoutes,
   },
   {
     path: "/dashboard",
