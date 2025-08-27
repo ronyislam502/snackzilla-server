@@ -281,14 +281,14 @@ const AdminStatisticsFromDB = async (filter: DashboardFilter) => {
   };
 };
 
-interface UserDashboardFilter {
+type TUserDashboardFilter = {
   startDate?: Date;
   endDate?: Date;
-}
+};
 
 export const UserStatisticsFromDB = async (
   email: string,
-  filter: UserDashboardFilter
+  filter: TUserDashboardFilter
 ) => {
   console.log("user", email);
   const user = await User.findOne({ email: email }).lean();
