@@ -8,6 +8,7 @@ import { PaymentRoutes } from "../modules/payment/payment.route";
 import { DashboardRoutes } from "../modules/dashboard/dashboard.route";
 import { ServiceReviewRoutes } from "../modules/serviceReview/serviceReview.route";
 import { FoodReviewRoutes } from "../modules/foodReview/foodReview.route";
+import { BlogRoutes } from "../modules/blog/blog.route";
 
 const router = Router();
 
@@ -27,6 +28,10 @@ const moduleRoutes = [
   {
     path: "/foods",
     route: FoodRoutes,
+  },
+  {
+    path: "/blogs",
+    route: BlogRoutes,
   },
   {
     path: "/orders",
