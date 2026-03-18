@@ -52,6 +52,24 @@ const OrderSchema = new Schema<TOrder>(
       type: String,
       required: true,
     },
+    trackingId: {
+      type: String,
+    },
+    invoiceLink: {
+      type: String,
+    },
+    po: {
+      type: String,
+    },
+    dueDate: {
+      type: String,
+    },
+    statusHistory: [
+      {
+        status: { type: String, required: true },
+        updatedAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   {
     timestamps: true,

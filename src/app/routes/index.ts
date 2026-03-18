@@ -7,8 +7,10 @@ import { OrderRoutes } from "../modules/order/order.route";
 import { PaymentRoutes } from "../modules/payment/payment.route";
 import { DashboardRoutes } from "../modules/dashboard/dashboard.route";
 import { ServiceReviewRoutes } from "../modules/serviceReview/serviceReview.route";
-import { FoodReviewRoutes } from "../modules/foodReview/foodReview.route";
 import { BlogRoutes } from "../modules/blog/blog.route";
+import { ReviewRoutes } from "../modules/review/review.route";
+import { ReservationRoutes } from "../modules/reservation/reservation.route";
+import { ContactRoutes } from "../modules/contact/contact.route";
 
 const router = Router();
 
@@ -46,12 +48,20 @@ const moduleRoutes = [
     route: ServiceReviewRoutes,
   },
   {
-    path: "/food-reviews",
-    route: FoodReviewRoutes,
-  },
-  {
     path: "/dashboard",
     route: DashboardRoutes,
+  },
+  {
+    path: "/reviews",
+    route: ReviewRoutes,
+  },
+  {
+    path: "/reservations",
+    route: ReservationRoutes,
+  },
+  {
+    path: "/contacts",
+    route: ContactRoutes,
   },
 ];
 

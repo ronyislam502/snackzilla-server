@@ -14,12 +14,16 @@ const sendMessage = async (
   content: string
 ) => {
   const message = await Message.create({ chatId, sender: senderId, content });
-  await Chat.findByIdAndUpdate(chatId, { lastMessage: content });
-  return message;
+  // Update lastMessage and trigger timestamps: true via findByIdAndUpdate with { new: true }
+  await Chat.findByIdAndUpdate(chatId, { lastMessage: content }, { new: true });
+  
+  // Populate sender for unified frontend handling
+  const populatedMessage = await Message.findById(message._id).populate("sender", "name avatar");
+  return populatedMessage;
 };
 
 const getMessagesByChatId = async (chatId: string) => {
-  return Message.find({ chatId }).sort({ createdAt: 1 });
+  return Message.find({ chatId }).populate("sender", "name avatar").sort({ createdAt: 1 });
 };
 
 const editMessage = async (
@@ -36,9 +40,14 @@ const editMessage = async (
   return message;
 };
 
+const getAllChatsFromDB = async () => {
+  return Chat.find().populate("participants", "name email avatar role").sort({ updatedAt: -1 });
+};
+
 export const ChatServices = {
   getOrCreateChat,
   sendMessage,
   getMessagesByChatId,
   editMessage,
+  getAllChatsFromDB,
 };

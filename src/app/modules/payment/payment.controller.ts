@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { PaymentServices } from "./payment.service";
 
 const confirmPayment = async (req: Request, res: Response) => {
-  const { transactionId, status } = req.query;
+  const { transactionId, status } = req.query.transactionId ? req.query : req.body;
 
   const result = await PaymentServices.confirmPaymentIntoDB(
     transactionId as string,

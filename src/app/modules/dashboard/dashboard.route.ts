@@ -7,4 +7,6 @@ router.get("/admin-stats", DashboardControllers.AdminStatistics);
 
 router.get("/user-stats/:email", DashboardControllers.UserStatistics);
 
+router.get("/top-foods", DashboardControllers.topSellingFoods);
+
 export const DashboardRoutes = router;

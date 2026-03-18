@@ -7,6 +7,18 @@ const createFoodSchema = z.object({
     description: z.string().min(1, "Description is required"),
     price: z.number().min(0, "Price must be non-negative"),
     preparationTime: z.number().min(0, "Preparation time must be non-negative"),
+    rating: z.number().optional(),
+    tags: z.array(z.string()).optional(),
+    ingredients: z.array(z.string()).optional(),
+    nutrition: z.object({
+      calories: z.number().optional(),
+      protein: z.string().optional(),
+      carbs: z.string().optional(),
+      fat: z.string().optional(),
+    }).optional(),
+    allergens: z.array(z.string()).optional(),
+    isVegetarian: z.boolean().optional(),
+    isSpicy: z.boolean().optional(),
   }),
 });
 
@@ -17,6 +29,18 @@ const updateFoodSchema = z.object({
     description: z.string().optional(),
     price: z.number().optional(),
     preparationTime: z.number().optional(),
+    rating: z.number().optional(),
+    tags: z.array(z.string()).optional(),
+    ingredients: z.array(z.string()).optional(),
+    nutrition: z.object({
+      calories: z.number().optional(),
+      protein: z.string().optional(),
+      carbs: z.string().optional(),
+      fat: z.string().optional(),
+    }).optional(),
+    allergens: z.array(z.string()).optional(),
+    isVegetarian: z.boolean().optional(),
+    isSpicy: z.boolean().optional(),
   }),
 });
 

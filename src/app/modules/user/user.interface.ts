@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-import { Model } from "mongoose";
-import { USER_ROLE, USER_STATUS } from "./user.const";
+import { Model, Types } from "mongoose";
+import { IAuthProvider, USER_ROLE, USER_STATUS } from "./user.const";
 
 export type TAddress = {
   street: string;
@@ -11,15 +11,19 @@ export type TAddress = {
 };
 
 export type TUser = {
+  _id: Types.ObjectId;
   name: string;
   email: string;
-  password: string;
+  password?: string;
   avatar?: string;
-  phone: string;
+  phone?: string;
   role: keyof typeof USER_ROLE;
-  status: keyof typeof USER_STATUS;
-  address: TAddress;
+  status?: keyof typeof USER_STATUS;
+  address?: TAddress;
   passwordChangedAt?: Date;
+  auths: IAuthProvider[];
+  isVerified?: boolean;
+  favorites: Types.ObjectId[];
   isDeleted: boolean;
 };
 

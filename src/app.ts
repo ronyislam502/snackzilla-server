@@ -5,15 +5,35 @@ import router from "./app/routes";
 import notFound from "./app/middlewares/notFound";
 import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import { OrderServices } from "./app/modules/order/order.service";
+import expressSession from "express-session";
+import passport from "passport";
 import cron from "node-cron";
+import "./app/config/passport"
+import config from "./app/config";
+
+
 
 const app: Application = express();
 
+app.use(expressSession({
+  secret: config.express_session_secret as string,
+  resave: false,
+  saveUninitialized: false,
+  proxy: config.NODE_ENV === "production",
+  cookie: {
+    secure: config.NODE_ENV === "production",
+    sameSite: config.NODE_ENV === "production" ? "none" : "lax",
+    httpOnly: true,
+  }
+}))
+
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: [config.client_url as string,"http://loacalhost:3000"],
     credentials: true,
   })
 );

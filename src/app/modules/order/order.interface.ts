@@ -28,4 +28,11 @@ export type TOrder = {
   status: keyof typeof ORDER_STATUS;
   paymentStatus: keyof typeof PAYMENT_STATUS;
   transactionId: string;
+  trackingId?: string;
+  invoiceLink?: string;
+  po?: string;
+  dueDate?: string;
+  statusHistory?: { status: string; updatedAt: Date }[];
+  createdAt?: Date;
+  updatedAt?: Date;
 };

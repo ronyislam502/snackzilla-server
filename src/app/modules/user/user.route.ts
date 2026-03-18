@@ -21,17 +21,29 @@ router.get("/", UserControllers.getAllUsers);
 
 router.get(
   "/user/:email",
-  // auth(USER_ROLE.ADMIN, USER_ROLE.USER),
+  auth(USER_ROLE.ADMIN, USER_ROLE.USER),
   UserControllers.getSingleUser
 );
 
 router.patch(
   "/update/:id",
-  // auth(USER_ROLE.ADMIN, USER_ROLE.USER),
+  auth(USER_ROLE.ADMIN, USER_ROLE.USER),
   multerUpload.single("avatar"),
   parseBody,
   validateRequest(UserValidations.updateUserValidationSchema),
   UserControllers.updateUser
+);
+
+router.patch(
+  "/toggle-favorite/:foodId",
+  auth(USER_ROLE.ADMIN, USER_ROLE.USER),
+  UserControllers.toggleFavorite
+);
+
+router.get(
+  "/favorites/:email",
+  auth(USER_ROLE.ADMIN, USER_ROLE.USER),
+  UserControllers.getFavorites
 );
 
 export const UserRoutes = router;

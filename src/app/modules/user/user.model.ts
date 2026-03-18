@@ -2,27 +2,39 @@ import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
 import { TAddress, TUser, UserModel } from "./user.interface";
 import config from "../../config";
-import { USER_ROLE, USER_STATUS } from "./user.const";
+import { IAuthProvider, USER_ROLE, USER_STATUS } from "./user.const";
 
 const addressSchema = new Schema<TAddress>({
   street: {
     type: String,
-    required: [true, "Street is required"],
+    required: [false, "Street is required"],
+    default: ""
   },
   city: {
     type: String,
-    required: [true, "City is required"],
+    required: [false, "City is required"],
+    default: ""
   },
-  state: { type: String },
+  state: { type: String, default: "" },
   postalCode: {
     type: String,
-    required: [true, "PostalCode is required"],
+    required: [false, "PostalCode is required"],
+    default: ""
   },
   country: {
     type: String,
-    required: [true, "Country is required"],
+    required: [false, "Country is required"],
+    default: ""
   },
 });
+
+const authProviderSchema = new Schema<IAuthProvider>({
+    provider: { type: String, required: true },
+    providerId: { type: String, required: true }
+}, {
+    versionKey: false,
+    _id: false
+})
 
 const userSchema = new Schema<TUser, UserModel>(
   {
@@ -42,7 +54,7 @@ const userSchema = new Schema<TUser, UserModel>(
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
+      required: [false, "Password is required"],
     },
     avatar: {
       type: String,
@@ -50,8 +62,6 @@ const userSchema = new Schema<TUser, UserModel>(
     },
     phone: {
       type: String,
-      required: [true, "Phone is required"],
-      unique: true,
     },
     role: {
       type: String,
@@ -69,8 +79,15 @@ const userSchema = new Schema<TUser, UserModel>(
     },
     address: {
       type: addressSchema,
-      required: [true, "Address is required"],
     },
+    isVerified: { type: Boolean, default: false },
+    auths: [authProviderSchema],
+    favorites: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Food",
+      },
+    ],
     isDeleted: {
       type: Boolean,
       default: false,
@@ -83,15 +100,17 @@ const userSchema = new Schema<TUser, UserModel>(
 
 userSchema.pre("save", async function (next) {
   const user = this;
-  user.password = await bcrypt.hash(
-    user.password,
-    Number(config.bcrypt_salt_rounds)
-  );
+  if (user.password) {
+    user.password = await bcrypt.hash(
+      user.password,
+      Number(config.bcrypt_salt_rounds)
+    );
+  }
   next();
 });
 
 userSchema.post("save", function (doc, next) {
-  console.log(doc.password);
+  // console.log(doc.password);
   doc.password = "";
   next();
 });

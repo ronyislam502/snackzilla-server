@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 
-export const USER_ROLE = {
+export const Food_ROLE = {
   Mild: "Mild",
   Medium: "Medium",
   Hot: "Hot",
@@ -14,4 +14,15 @@ export type TFood = {
   image?: string;
   preparationTime: number;
   isDeleted: boolean;
+  tags?: string[];
+  ingredients?: string[];
+  nutrition?: {
+    calories: number;
+    protein: string;
+    carbs: string;
+    fat: string;
+  };
+  allergens?: string[];
+  isVegetarian?: boolean;
+  isSpicy?: boolean;
 };

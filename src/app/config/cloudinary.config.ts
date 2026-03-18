@@ -8,3 +8,21 @@ cloudinary.config({
 });
 
 export const cloudinaryUpload = cloudinary;
+
+export const uploadToCloudinary = (buffer: Buffer, filename: string): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: 'raw',
+        public_id: `invoices/${filename}`,
+        format: 'pdf',
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+
+    uploadStream.end(buffer);
+  });
+};

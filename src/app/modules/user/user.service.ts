@@ -3,6 +3,7 @@ import QueryBuilder from "../../builder/queryBuilder";
 import AppError from "../../errors/AppError";
 import { TImageFile } from "../../interface/image.interface";
 import { UserSearchableFields } from "./user.const";
+import { Types } from "mongoose";
 import { TUser } from "./user.interface";
 import { User } from "./user.model";
 
@@ -11,9 +12,6 @@ const createUserIntoDB = async (avatar: TImageFile, payload: TUser) => {
   payload.avatar = file?.path;
 
   const result = await User.create(payload);
-
-  console.log("res", result);
-
   return result;
 };
 
@@ -35,9 +33,16 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getSingleUserFromDB = async (email: string) => {
-  const user = await User.find({ email });
+  const user = await User.findOne({ email }).lean();
 
-  return user;
+  if (!user) {
+    return null;
+  }
+
+  return {
+    ...user,
+    hasPassword: !!user.password,
+  };
 };
 
 const updateUserIntoDB = async (
@@ -52,7 +57,10 @@ const updateUserIntoDB = async (
   }
 
   const file = avatar;
-  payload.avatar = file?.path;
+  if (file) {
+    payload.avatar = file?.path;
+  }
+
 
   const result = await User.findByIdAndUpdate(id, payload, {
     new: true,
@@ -62,9 +70,43 @@ const updateUserIntoDB = async (
   return result;
 };
 
+const toggleFavoriteIntoDB = async (userId: string, foodId: string) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  const foodObjectId = new Types.ObjectId(foodId);
+  const isFavorite = user.favorites.some((id) => id.equals(foodObjectId));
+
+  let result;
+  if (isFavorite) {
+    result = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { favorites: foodObjectId } },
+      { new: true }
+    );
+  } else {
+    result = await User.findByIdAndUpdate(
+      userId,
+      { $addToSet: { favorites: foodObjectId } },
+      { new: true }
+    );
+  }
+
+  return result;
+};
+
+const getFavoritesFromDB = async (email: string) => {
+  const result = await User.findOne({ email }).populate("favorites");
+  return result?.favorites || [];
+};
+
 export const UserServices = {
   createUserIntoDB,
   getAllUsersFromDB,
   getSingleUserFromDB,
   updateUserIntoDB,
+  toggleFavoriteIntoDB,
+  getFavoritesFromDB,
 };

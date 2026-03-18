@@ -34,6 +34,32 @@ const FoodSchema = new Schema<TFood>(
       type: Boolean,
       default: false,
     },
+    tags: {
+      type: [String],
+      default: [],
+    },
+    ingredients: {
+      type: [String],
+      default: [],
+    },
+    nutrition: {
+      calories: { type: Number },
+      protein: { type: String },
+      carbs: { type: String },
+      fat: { type: String },
+    },
+    allergens: {
+      type: [String],
+      default: [],
+    },
+    isVegetarian: {
+      type: Boolean,
+      default: false,
+    },
+    isSpicy: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

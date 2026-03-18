@@ -35,6 +35,7 @@ export const paymentSuccessTemplate = async (
       <p><b>Tax (10%):</b> $${order.tax.toFixed(2)}</p>
       <p><b>Grand Total:</b> $${order.grandAmount.toFixed(2)}</p>
       <p><b>OrderNo:</b> ${order.transactionId}</p>
+      ${order.invoiceLink ? `<p><a href="${order.invoiceLink}" target="_blank" style="display:inline-block; margin-top:10px; padding:8px 15px; background:#1e3a8a; color:#fff; text-decoration:none; border-radius:5px; font-weight:bold;">Download Invoice</a></p>` : ""}
     `;
   }
 
@@ -98,34 +99,24 @@ export const paymentSuccessTemplate = async (
 };
 
 export const paymentEmailTemplate = async (order: TOrder) => {
-  const { user, foods, totalPrice, tax, grandAmount, transactionId } = order;
+  const { user, transactionId } = order;
 
   const customer = await User.findById(user);
 
-  const foodList = foods
-    .map(
-      (item: any) =>
-        `<li style="margin-bottom:15px; display:flex; align-items:center;">
-          <img src="${item.food.image}" alt="${item.food.name}" width="40" height="40" style="border-radius:5px; margin-right:15px;"/>
-          <div>
-            <strong>${item.food.name}</strong> x${item.quantity}<br/>
-            $${(item.food.price * item.quantity).toFixed(2)}
-          </div>
-        </li>`
-    )
-    .join("");
-
   return `
     <div style="font-family: Arial; padding:20px; background:#f4f4f4;">
-      <div style="max-width:600px; margin:auto; background:#fff; border-radius:8px; padding:30px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+      <div style="max-width:600px; margin:auto; background:#fff; border-radius:8px; padding:30px; box-shadow:0 2px 8px rgba(0,0,0,0.1); text-align: center;">
         <h2 style="color:#4CAF50;">Payment Successful 🎉</h2>
         <p>Hi ${customer?.name},</p>
-        <p>Your payment has been received. Here are the order details:</p>
-        <ul>${foodList}</ul>
-        <p><b>Total Price:</b> $${totalPrice.toFixed(2)}</p>
-        <p><b>Tax (10%):</b> $${tax.toFixed(2)}</p>
-        <p><b>Grand Total:</b> $${grandAmount.toFixed(2)}</p>
-        <p><b>OrderNo:</b> ${transactionId}</p>
+        <p>Your payment has been received. You can now download your invoice using the link below:</p>
+        
+        ${(order as any).invoiceLink ? `
+          <div style="margin: 30px 0;">
+            <a href="${(order as any).invoiceLink}" style="display:inline-block; padding:12px 25px; background:#1e3a8a; color:#fff; text-decoration:none; border-radius:5px; font-weight:bold; font-size: 16px;">Download Your Invoice</a>
+          </div>
+        ` : "<p>Preparing your invoice. Please check back soon.</p>"}
+        
+        <p style="color: #718096; font-size: 12px; margin-top: 20px;">Order Reference: ${transactionId}</p>
         <p>Thank you for ordering with SnackZilla!</p>
       </div>
     </div>

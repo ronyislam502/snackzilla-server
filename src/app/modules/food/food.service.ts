@@ -6,9 +6,10 @@ import { TImageFile } from "../../interface/image.interface";
 import { Food } from "./food.model";
 import QueryBuilder from "../../builder/queryBuilder";
 
+
 const createFoodIntoDB = async (image: TImageFile, payload: TFood) => {
   const isCategoryExists = await Category.findById(payload?.category);
-  console.log(isCategoryExists);
+  // console.log(isCategoryExists);
 
   if (!isCategoryExists) {
     throw new AppError(httpStatus.NOT_FOUND, "Category not found");
@@ -24,7 +25,10 @@ const createFoodIntoDB = async (image: TImageFile, payload: TFood) => {
 };
 
 const allFoodsFromDB = async (query: Record<string, unknown>) => {
-  const foodQuery = new QueryBuilder(Food.find().populate("category"), query)
+  const foodQuery = new QueryBuilder(
+    Food.find({ isDeleted: { $ne: true } }).populate("category"),
+    query
+  )
     .search(["category.name", "name", "description"])
     .filter()
     .sort()
@@ -48,7 +52,10 @@ const allFoodsByCategoryFromDB = async (
   }
 
   const foodCategoryQuery = new QueryBuilder(
-    Food.find({ category: isCategoryExists?._id }).populate("category"),
+    Food.find({
+      category: isCategoryExists?._id,
+      isDeleted: { $ne: true },
+    }).populate("category"),
     query
   )
     .search(["name"])
@@ -103,6 +110,7 @@ const deleteFoodFromDB = async (id: string) => {
 
   return result;
 };
+
 
 export const FoodServices = {
   createFoodIntoDB,

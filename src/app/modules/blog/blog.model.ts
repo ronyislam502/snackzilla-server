@@ -19,6 +19,7 @@ const BlogSchema = new Schema<TBlog>(
     },
     image: {
       type: String,
+      default:""
     },
     tags: [{
       type: String,

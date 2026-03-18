@@ -11,11 +11,19 @@ dotenv.config();
 
 export const initiatePayment = async (paymentData: TPayment) => {
   const customer = await User.findById(paymentData?.user);
+
+  // console.log("customer", customer)
   const address = customer?.address
     ? `${customer?.address?.street}, ${customer?.address?.city}-${customer?.address?.postalCode}, ${customer?.address?.state}, ${customer.address.country}`
     : "";
-
   try {
+    // console.log("Initiating payment with data:", {
+    //   store_id: config.store_id,
+    //   tran_id: paymentData?.transactionId,
+    //   amount: paymentData?.grandAmount,
+    //   cus_email: customer?.email,
+    // });
+
     const response = await axios.post(config.payment_url as string, {
       store_id: config.store_id,
       signature_key: config.signature_key,
@@ -29,15 +37,19 @@ export const initiatePayment = async (paymentData: TPayment) => {
       cus_name: customer?.name,
       cus_email: customer?.email,
       cus_phone: customer?.phone,
-      cus_add1: address,
+      cus_add1: address || "N/A",
       cus_add2: "N/A",
-      cus_street: customer?.address?.street,
-      cus_city: customer?.address?.city,
-      cus_state: customer?.address?.state,
-      cus_postcode: customer?.address?.postalCode,
-      cus_country: customer?.address?.country,
+      cus_street: customer?.address?.street || "N/A",
+      cus_city: customer?.address?.city || "N/A",
+      cus_state: customer?.address?.state || "N/A",
+      cus_postcode: customer?.address?.postalCode || "N/A",
+      cus_country: customer?.address?.country || "N/A",
       type: "json",
     });
+
+    if (response.data && response.data.result !== "true") {
+        console.error("Aamarpay Error:", response.data);
+    }
 
     return response?.data?.payment_url;
   } catch (err: any) {

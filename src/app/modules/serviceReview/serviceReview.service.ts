@@ -19,6 +19,16 @@ const createServiceReviewIntoDB = async (payload: TServiceReview) => {
     throw new AppError(httpStatus.NOT_FOUND, "Order not found");
   }
 
+  // Ensure the order belongs to the user
+  if (isOrder.user.toString() !== payload.user.toString()) {
+    throw new AppError(httpStatus.FORBIDDEN, "You can only review your own orders");
+  }
+
+  // Ensure the order is DELIVERED
+  if (isOrder.status !== "DELIVERED") {
+    throw new AppError(httpStatus.BAD_REQUEST, "Reviews are only permitted for delivered orders");
+  }
+
   const result = await ServiceReview.create(payload);
 
   return result;

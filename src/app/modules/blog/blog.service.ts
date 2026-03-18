@@ -5,7 +5,6 @@ import { TImageFile } from "../../interface/image.interface";
 import { User } from "../user/user.model";
 import { TBlog } from "./blog.interface";
 import { Blog } from "./blog.model";
-import { Food } from "../food/food.model";
 
 const createBlogIntoDB = async (image: TImageFile,payload: TBlog) => {
     const isUserExists=await User.findById(payload.user)
@@ -22,7 +21,7 @@ const createBlogIntoDB = async (image: TImageFile,payload: TBlog) => {
 }
 
 const allBlogsFromDB = async (query: Record<string, unknown>) => {
-  const blogQuery = new QueryBuilder(Blog.find().populate("user"), query)
+  const blogQuery = new QueryBuilder(Blog.find().populate("user", 'avatar name email'), query)
     .search(["user.name", "title", "description"])
     .filter()
     .sort()

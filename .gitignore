@@ -6,3 +6,6 @@ dist
 
 # git remote add origin https://github.com/ronyislam502/snackzilla-server.git
 
+
+.vercel
+.env*.local

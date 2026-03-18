@@ -8,6 +8,11 @@ export const USER_STATUS = {
   BLOCKED: "BLOCKED",
 } as const;
 
+export interface IAuthProvider {
+    provider: "google" | "credentials";  // "Google", "Credential"
+    providerId: string;
+}
+
 export const UserSearchableFields = [
   "name",
   "email",

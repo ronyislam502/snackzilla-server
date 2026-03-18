@@ -8,23 +8,13 @@ import bcrypt from "bcrypt";
 import { JwtPayload } from "jsonwebtoken";
 import { USER_STATUS } from "../user/user.const";
 import sendEmail from "../../utilities/sendEmail";
+import { TUser } from "../user/user.interface";
 
-const loginUserFromDB = async (payload: TLoginUser) => {
-  const user = await User.isUserExistsByEmail(payload?.email);
+const getTokensAfterAuthentication = async (user: TUser) => {
 
-  if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
-  }
-
-  const isDeleted = user?.isDeleted;
-  if (isDeleted) {
-    throw new AppError(httpStatus.FORBIDDEN, "This user is deleted !");
-  }
-
-  if (!(await User.isPasswordMatched(payload?.password, user?.password))) {
-    throw new AppError(httpStatus.FORBIDDEN, "Password do not matched");
-  }
   const jwtPayload = {
+    user: user._id.toString(),
+    name: user.name,
     email: user.email,
     role: user.role,
   };
@@ -43,16 +33,86 @@ const loginUserFromDB = async (payload: TLoginUser) => {
 
   return {
     accessToken,
+    refreshToken,
+  };
+};
+
+const loginUserFromDB = async (payload: TLoginUser) => {
+  const user = await User.isUserExistsByEmail(payload?.email);
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
+  }
+
+  const isDeleted = user?.isDeleted;
+
+  if (isDeleted) {
+    throw new AppError(httpStatus.FORBIDDEN, "This user is deleted !");
+  }
+
+  if (!(await User.isPasswordMatched(payload?.password, user?.password as string))) {
+    throw new AppError(httpStatus.FORBIDDEN, "Password do not matched");
+  }
+  
+  const { accessToken, refreshToken } = await getTokensAfterAuthentication(user);
+
+  return {
+    accessToken,
     user,
+    refreshToken,
+  };
+};
+
+const googleLoginFromDB = async (payload:TUser) => {
+  let user = await User.findOne({ email: payload.email });
+
+  if (!user) {
+    user = await User.create({
+      name: payload.name,
+      email: payload.email,
+      phone: payload.phone,
+      avatar: payload.avatar,
+      role: "USER",
+      isVerified: true,
+      auths: [
+        {
+          provider: "google",
+          providerId: payload.email, 
+        },
+      ],
+    });
+  }
+
+  const jwtPayload = {
+    user: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  };
+
+  const accessToken = createToken(
+    jwtPayload,
+    config.access_token_secret as string,
+    config.access_token_expire_in as string
+  );
+
+   const refreshToken = createToken(
+    jwtPayload,
+    config.refresh_token_secret as string,
+    config.refresh_token_expire_in as string
+   );
+  
+
+  return {
+    accessToken,
     refreshToken,
   };
 };
 
 const changePasswordIntoDB = async (
   userData: JwtPayload,
-  payload: { oldPassword: string; newPassword: string }
+  payload: { oldPassword?: string; newPassword: string }
 ) => {
-  console.log("userData", userData);
   // checking if the user is exist
   const user = await User.isUserExistsByEmail(userData.email);
 
@@ -69,9 +129,13 @@ const changePasswordIntoDB = async (
   }
 
   //checking if the password is correct
+  if (user.password && !payload.oldPassword) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Old password is required to change password");
+  }
 
-  if (!(await User.isPasswordMatched(payload.oldPassword, user?.password)))
+  if (user.password && !(await User.isPasswordMatched(payload.oldPassword!, user.password as string))) {
     throw new AppError(httpStatus.FORBIDDEN, "Password do not matched");
+  }
 
   //hash new password
   const newHashedPassword = await bcrypt.hash(
@@ -190,7 +254,11 @@ const forgetPasswordFromDB = async (email: string) => {
     </div>
   </div>
 `;
-  await sendEmail(isUser?.email, subject, emailHtml);
+  const result = await sendEmail(isUser?.email, subject, emailHtml);
+
+  // console.log(result)
+  
+  return result;
 };
 
 const resetPasswordFromDB = async (
@@ -239,10 +307,24 @@ const resetPasswordFromDB = async (
   );
 };
 
+const register = async (payload: TUser) => {
+  const user = await User.create(payload);
+  const { accessToken, refreshToken } = await getTokensAfterAuthentication(user);
+
+  return {
+    accessToken,
+    refreshToken,
+    user,
+  };
+};
+
 export const AuthServices = {
+  getTokensAfterAuthentication,
   loginUserFromDB,
   changePasswordIntoDB,
   refreshTokenFromDB,
   forgetPasswordFromDB,
   resetPasswordFromDB,
+  googleLoginFromDB,
+  register,
 };

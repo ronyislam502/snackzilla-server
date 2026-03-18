@@ -86,6 +86,8 @@ const deleteFood = catchAsync(async (req, res) => {
   });
 });
 
+
+
 export const FoodControllers = {
   createFood,
   allFoods,
@@ -93,4 +95,5 @@ export const FoodControllers = {
   updateFood,
   deleteFood,
   allFoodsByCategory,
+
 };

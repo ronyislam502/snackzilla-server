@@ -3,11 +3,13 @@ import { CategoryControllers } from "./category.controller";
 import { multerUpload } from "../../config/multer.config";
 import { parseBody } from "../../middlewares/bodyParser";
 import { FoodControllers } from "../food/food.controller";
+import auth from "../../middlewares/auth";
+import { USER_ROLE } from "../user/user.const";
 
 const router = Router();
 
 router.post(
-  "/create-category",
+  "/create-category",auth(USER_ROLE.ADMIN),
   multerUpload.single("icon"),
   parseBody,
   CategoryControllers.createCategory

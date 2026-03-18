@@ -58,9 +58,36 @@ const updateUser = catchAsync(async (req, res) => {
   });
 });
 
+const toggleFavorite = catchAsync(async (req, res) => {
+  const { foodId } = req.params;
+  const userId = (req as any).user._id; 
+  const result = await UserServices.toggleFavoriteIntoDB(userId, foodId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Favorite toggled successfully",
+    data: result,
+  });
+});
+
+const getFavorites = catchAsync(async (req, res) => {
+  const { email } = req.params;
+  const result = await UserServices.getFavoritesFromDB(email);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Favorites retrieved successfully",
+    data: result,
+  });
+});
+
 export const UserControllers = {
   createUser,
   getAllUsers,
   getSingleUser,
   updateUser,
+  toggleFavorite,
+  getFavorites,
 };
