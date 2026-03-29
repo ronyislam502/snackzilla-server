@@ -17,7 +17,7 @@ async function main() {
 
     const io = new SocketServer(server, {
       cors: {
-        origin: [config.client_url as string, "http://localhost:3000", "http://localhost:3001"],
+        origin: [config.client_url as string],
         credentials: true,
       },
     });
