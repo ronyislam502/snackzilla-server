@@ -41,8 +41,25 @@ const singleCategory = catchAsync(async (req, res) => {
   });
 });
 
+const updateCategory = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await CategoryServices.updateCategoryIntoDB(
+    id,
+    req.file as TImageFile,
+    req.body
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Category updated successfully",
+    data: result,
+  });
+});
+
 export const CategoryControllers = {
   createCategory,
   allCategories,
   singleCategory,
+  updateCategory
 };

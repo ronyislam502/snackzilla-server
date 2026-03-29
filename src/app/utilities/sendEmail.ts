@@ -13,7 +13,7 @@ const sendEmail = async (email: string, subject: string, html: string) => {
   });
 
   await transporter.sendMail({
-    from: `"SnackZilla" <${config.sender_email}>`, // sender address
+    from: `"SnackZilla" <${config?.sender_email}>`, // sender address
     to: email,
     subject,
     text: "",

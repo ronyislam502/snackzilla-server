@@ -21,4 +21,11 @@ router.get("/:id", CategoryControllers.singleCategory);
 
 router.get("/category-foods/:categoryId", FoodControllers.allFoodsByCategory);
 
+router.post(
+  "/update-category/:id",auth(USER_ROLE.ADMIN),
+  multerUpload.single("icon"),
+  parseBody,
+  CategoryControllers.updateCategory
+);
+
 export const CategoryRoutes = router;

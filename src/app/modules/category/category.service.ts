@@ -23,8 +23,24 @@ const singleCategoryFromDB = async (id: string) => {
   return result;
 };
 
+const updateCategoryIntoDB = async (id: string, icon: TImageFile, payload: TCategory) => {
+  const isCategory = await Category.findById(id);
+
+  if (!isCategory) {
+    throw new Error("Category not found");
+  }
+
+  if (icon && icon.path) {
+    payload.icon = icon.path;
+  }
+
+  const result = await Category.findByIdAndUpdate(isCategory?._id, payload, { new: true });
+  return result;
+};
+
 export const CategoryServices = {
   createCategoryIntoDB,
   allCategoriesFromDB,
   singleCategoryFromDB,
+  updateCategoryIntoDB
 };
