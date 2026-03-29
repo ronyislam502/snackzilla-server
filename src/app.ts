@@ -35,7 +35,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: [config.client_url as string , "http://localhost:3000", "http://localhost:3001"],
+    origin: [config.client_url as string , "http://localhost:3000", "http://localhost:3001", "https://snackzilla.vercel.app"],
     credentials: true,
   })
 );
