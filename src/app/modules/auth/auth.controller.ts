@@ -127,8 +127,6 @@ const googleAuth = catchAsync(async (req, res) => {
 
    res.redirect(`${redirectUrl}${redirectTo ? `&redirect=${redirectTo}` : ""}`);
 
-  // res.redirect(`${config?.client_live_url}`)
-
 })
 
 const register = catchAsync(async (req, res) => {
