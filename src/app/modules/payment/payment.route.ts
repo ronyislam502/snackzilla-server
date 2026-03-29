@@ -10,9 +10,5 @@ router.post(
   PaymentControllers.confirmPayment
 );
 
-router.get(
-  "/confirm",
-  PaymentControllers.confirmPayment
-);
 
 export const PaymentRoutes = router;

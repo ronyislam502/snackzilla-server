@@ -12,24 +12,17 @@ dotenv.config();
 export const initiatePayment = async (paymentData: TPayment) => {
   const customer = await User.findById(paymentData?.user);
 
-  // console.log("customer", customer)
   const address = customer?.address
     ? `${customer?.address?.street}, ${customer?.address?.city}-${customer?.address?.postalCode}, ${customer?.address?.state}, ${customer.address.country}`
     : "";
   try {
-    // console.log("Initiating payment with data:", {
-    //   store_id: config.store_id,
-    //   tran_id: paymentData?.transactionId,
-    //   amount: paymentData?.grandAmount,
-    //   cus_email: customer?.email,
-    // });
-
+  
     const response = await axios.post(config.payment_url as string, {
       store_id: config.store_id,
       signature_key: config.signature_key,
       tran_id: paymentData?.transactionId,
-      success_url: `${config?.live_url_server}/api/payments/confirm?transactionId=${paymentData?.transactionId}&status=success`,
-      fail_url: `${config?.live_url_server}/api/payments/confirm?status=failed`,
+      success_url: `${config?.live_url_server}/api/v1/payments/confirm?transactionId=${paymentData?.transactionId}&status=success`,
+      fail_url: `${config?.live_url_server}/api/v1/payments/confirm?status=failed`,
       cancel_url: config.client_live_url_page,
       desc: "Merchant Registration Payment",
       amount: paymentData?.grandAmount,
@@ -46,10 +39,6 @@ export const initiatePayment = async (paymentData: TPayment) => {
       cus_country: customer?.address?.country || "N/A",
       type: "json",
     });
-
-    if (response.data && response.data.result !== "true") {
-        console.error("Aamarpay Error:", response.data);
-    }
 
     return response?.data?.payment_url;
   } catch (err: any) {

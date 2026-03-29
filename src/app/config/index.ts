@@ -24,7 +24,7 @@ export default {
   signature_key: process.env.SIGNATURE_KEY,
   payment_url: process.env.PAYMENT_URL,
   payment_verify_url: process.env.PAYMENT_VERIFY_URL,
-  live_url_server: process.env.LIVE_URL,
+  live_url_server: process.env.LIVE_URL_SERVER,
   client_live_url_page: process.env.CLIENT_LIVE_URL_PAGE,
   client_url: process.env.CLIENT_URL,
   google_client_id: process.env.GOOGLE_CLIENT_ID,

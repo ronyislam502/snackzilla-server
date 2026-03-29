@@ -43,6 +43,33 @@ export const chatSocket = (socketIo: Server) => {
           io.to(data.chatId).emit("receive-message", emitData);
           // Notify admins for sidebar updates
           io.to("admin").emit("chat-updated", { chatId: data.chatId, lastMessage: data.content });
+
+          // Notification Logic
+          try {
+            const { Chat } = require("../modules/chat/chat.model");
+            require("../modules/user/user.model");
+            const chat = await Chat.findById(data.chatId).populate("participants", "role name");
+            if (chat) {
+              const sender = chat.participants.find((p: any) => p._id.toString() === data.senderId);
+              const receiver = chat.participants.find((p: any) => p._id.toString() !== data.senderId);
+              if (sender && receiver) {
+                  const notifSenderName = (sender as any).name || "Someone";
+                  if ((sender as any).role === "USER") {
+                      console.log("Emitting notification to admin");
+                      io.to("admin").emit("notification", {
+                          message: `New message from ${notifSenderName}`
+                      });
+                  } else if ((sender as any).role === "ADMIN") {
+                      console.log("Emitting notification to user:", `user-${receiver._id.toString()}`);
+                      io.to(`user-${receiver._id.toString()}`).emit("notification", {
+                          message: `New message from Admin`
+                      });
+                  }
+              }
+            }
+          } catch (err) {
+            console.error("Error emitting notification", err);
+          }
         }
       }
     );
@@ -137,7 +164,7 @@ export const chatSocket = (socketIo: Server) => {
       }
     );
 
-    socket.on("disconnect", () => console.log("User disconnected:", socket.id));
+    // socket.on("disconnect", () => console.log("User disconnected:", socket.id));
   });
 };
 

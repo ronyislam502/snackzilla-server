@@ -6,6 +6,7 @@ import notFound from "./app/middlewares/notFound";
 import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import { OrderServices } from "./app/modules/order/order.service";
 import expressSession from "express-session";
+import MongoStore from "connect-mongo";
 import passport from "passport";
 import cron from "node-cron";
 import "./app/config/passport"
@@ -19,6 +20,7 @@ app.use(expressSession({
   secret: config.express_session_secret as string,
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: config.database_url as string }),
   proxy: config.NODE_ENV === "production",
   cookie: {
     secure: config.NODE_ENV === "production",
@@ -46,7 +48,7 @@ cron.schedule("*/5 * * * *", async () => {
   }
 });
 
-app.use("/api", router);
+app.use("/api/v1", router);
 
 const getController = (req: Request, res: Response) => {
   res.send("SnackZilla app");

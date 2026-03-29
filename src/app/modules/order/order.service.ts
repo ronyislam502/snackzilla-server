@@ -6,10 +6,10 @@ import { Order } from "./order.model";
 import { Food } from "../food/food.model";
 import { User } from "../user/user.model";
 import { initiatePayment } from "../payment/payment.utils";
+import config from "../../config";
 
 
 const createOrderIntoDB = async (payload: TOrder) => {
-  console.log("Order creation payload:", JSON.stringify(payload, null, 2));
   const { user, foods } = payload;
 
   const userExists = await User.findById(user)
@@ -86,7 +86,6 @@ const createOrderIntoDB = async (payload: TOrder) => {
     };
 
     const payment = await initiatePayment(paymentData);
-    console.log("Payment initiation result:", payment);
 
     if (!payment) {
       throw new Error("Payment initialization failed to generate a URL.");
@@ -122,13 +121,8 @@ const allOrdersFromDB = async (query: Record<string, unknown>) => {
     .fields();
 
   const meta = await orderQuery.countTotal();
-  const rawData = await orderQuery.modelQuery;
+  const data = await orderQuery.modelQuery;
 
-  const baseUrl = process.env.LIVE_URL || "https://snackzilla-server.vercel.app";
-  const data = rawData.map((order: any) => ({
-    ...order.toObject(),
-    invoiceLink: `${baseUrl}/api/orders/invoice/${order._id}`,
-  }));
 
   return { meta, data };
 };
@@ -146,12 +140,7 @@ const singleOrderFromDB = async (id: string) => {
         select: "name",
       },
     });
-
-  if (result) {
-    const baseUrl = process.env.LIVE_URL || "https://snackzilla-server.vercel.app";
-    (result as any).invoiceLink = `${baseUrl}/api/orders/invoice/${result._id}`;
-  }
-
+  
   return result;
 };
 
@@ -423,8 +412,7 @@ const trackOrderByTrackingId = async (identifier: string) => {
     });
 
   if (result) {
-    const baseUrl = process.env.LIVE_URL || "https://snackzilla-server.vercel.app";
-    (result as any).invoiceLink = `${baseUrl}/api/orders/invoice/${result._id}`;
+    (result as any).invoiceLink = `${config.live_url_server}/api/orders/invoice/${result._id}`;
   }
 
   return result;

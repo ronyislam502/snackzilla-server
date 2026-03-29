@@ -51,7 +51,6 @@ const confirmPaymentIntoDB = async (transactionId: string, status: string) => {
               status: ORDER_STATUS.SHIPPED,
               $push: { statusHistory: { status: ORDER_STATUS.SHIPPED, updatedAt: new Date() } }
             });
-            console.log(`Order ${order?._id} status updated to SHIPPED (Simulated)`);
 
             setTimeout(async () => {
               try {
