@@ -17,7 +17,7 @@ router.post(
   UserControllers.createUser
 );
 
-router.get("/", UserControllers.getAllUsers);
+router.get("/", auth(USER_ROLE.ADMIN), UserControllers.getAllUsers);
 
 router.get(
   "/user/:email",
