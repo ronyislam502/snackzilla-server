@@ -1,7 +1,24 @@
 import PDFDocument from "pdfkit";
 import axios from "axios";
 
-export const generateInvoicePDF = async (orderData: any): Promise<Buffer> => {
+export type TPopulatedOrder = {
+  _id: string;
+  user: { name: string; address: { street: string; city: string; state?: string; postalCode: string; country: string }; phone: string };
+  foods: { food: { name: string; image: string; price: number }; quantity: number }[];
+  transactionId: string;
+  createdAt: string | number | Date;
+  po?: string;
+  dueDate?: string;
+  totalPrice: number;
+  totalQuantity: number;
+  tax: number;
+  grandAmount: number;
+  status: string;
+  paymentStatus: string;
+  invoiceLink?: string;
+};
+
+export const generateInvoicePDF = async (orderData: TPopulatedOrder): Promise<Buffer> => {
 
   const logoUrl = "https://i.postimg.cc/gjhSbS06/resturent.png";
 
@@ -11,7 +28,7 @@ export const generateInvoicePDF = async (orderData: any): Promise<Buffer> => {
 
   // fetch food images
   const imageBuffers = await Promise.all(
-    orderData.foods.map(async (item: any) => {
+    orderData.foods.map(async (item) => {
       try {
         const response = await axios.get(item.food.image, {
           responseType: "arraybuffer",
@@ -31,7 +48,7 @@ export const generateInvoicePDF = async (orderData: any): Promise<Buffer> => {
     const buffers: Buffer[] = [];
 
     doc.on("data", (chunk) => buffers.push(chunk));
-    doc.on("end", () => resolve(Buffer.concat(buffers as any)));
+    doc.on("end", () => resolve(Buffer.concat(buffers as Uint8Array[])));
     doc.on("error", (err) => reject(err));
 
     const primaryBlue = "#1e3a8a";
@@ -141,7 +158,7 @@ export const generateInvoicePDF = async (orderData: any): Promise<Buffer> => {
     // TABLE BODY
     let y = tableTop + 35;
 
-    orderData.foods.forEach((item: any, index: number) => {
+    orderData.foods.forEach((item, index: number) => {
 
       doc.fillColor(textDark).font("Helvetica");
 

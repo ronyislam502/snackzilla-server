@@ -9,7 +9,7 @@ cloudinary.config({
 
 export const cloudinaryUpload = cloudinary;
 
-export const uploadToCloudinary = (buffer: Buffer, filename: string): Promise<any> => {
+export const uploadToCloudinary = (buffer: Buffer, filename: string): Promise<unknown> => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {

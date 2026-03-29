@@ -60,7 +60,7 @@ const updateUser = catchAsync(async (req, res) => {
 
 const toggleFavorite = catchAsync(async (req, res) => {
   const { foodId } = req.params;
-  const userId = (req as any).user._id; 
+  const userId = (req.user as { _id: string })._id; 
   const result = await UserServices.toggleFavoriteIntoDB(userId, foodId);
 
   sendResponse(res, {

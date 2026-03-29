@@ -61,7 +61,7 @@ ReviewSchema.statics.calculateAverageRating = async function (foodId: Schema.Typ
 };
 
 ReviewSchema.post("save", function () {
-  // @ts-ignore
+  // @ts-expect-error: this.constructor is properly typed as Model in later Mongoose versions but might still flag in some environments
   this.constructor.calculateAverageRating(this.food);
 });
 

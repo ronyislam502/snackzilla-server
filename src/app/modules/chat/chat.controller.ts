@@ -5,7 +5,7 @@ import { User } from "../user/user.model";
 import { ChatServices } from "./chat.service";
 
 const createOrGetChat = catchAsync(async (req, res) => {
-  const userId = req.body.userId || (req as any).user?.user;
+  const userId = req.body.userId;
   let adminId = req.body.adminId;
 
   if (!userId) {

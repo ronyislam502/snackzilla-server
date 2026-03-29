@@ -92,11 +92,12 @@ const createOrderIntoDB = async (payload: TOrder) => {
     }
 
     return payment;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Order or Payment Error:", error);
+    const err = error as { statusCode?: number; message?: string };
     throw new AppError(
-      error.statusCode || httpStatus.FORBIDDEN,
-      `Order creation failed: ${error?.message || "Internal Server Error"}`
+      err.statusCode || httpStatus.FORBIDDEN,
+      `Order creation failed: ${err?.message || "Internal Server Error"}`
     );
   }
 };
@@ -152,7 +153,7 @@ const updateOrderIntoDB = async (id: string, payload: Partial<TOrder>) => {
     throw new AppError(httpStatus.NOT_FOUND, "this Order not found");
   }
 
-  const updateData: any = { ...payload };
+  const updateData: Record<string, unknown> = { ...payload };
   if (payload.status && payload.status !== isOrderExists.status) {
     updateData.$push = {
       statusHistory: { status: payload.status, updatedAt: new Date() },
@@ -222,52 +223,6 @@ const cancelUnpaidOrdersFromDB = async () => {
   return result;
 };
 
-//  const topSellingFoodsFromDB = async () => {
-//   const result = await Order.aggregate([
-//     {
-//       $match: {
-//         paymentStatus: PAYMENT_STATUS.PAID,
-//       },
-//     },
-//     {
-//       $unwind: "$foods",
-//     },
-//     {
-//       $group: {
-//         _id: "$foods.food",
-//         totalSoldQuantity: { $sum: "$foods.quantity" },
-//         totalOrders: { $sum: 1 },
-//       },
-//     },
-//     {
-//       $sort: { totalSoldQuantity: -1 },
-//     },
-//     {
-//       $lookup: {
-//         from: "foods",
-//         localField: "_id",
-//         foreignField: "_id",
-//         as: "food",
-//       },
-//     },
-//     {
-//       $unwind: "$food",
-//     },
-//     {
-//       $project: {
-//         _id: 0,
-//         foodId: "$food._id",
-//         foodName: "$food.name",
-//         price: "$food.price",
-//         image: "$food.image",
-//         totalSoldQuantity: 1,
-//         totalOrders: 1,
-//       },
-//     },
-//   ]);
-
-//   return result;
-// };
 
 const pendingOrdersFromDB = async (query: Record<string, unknown>) => {
   const status = {
@@ -387,7 +342,7 @@ const deliveredOrdersFromDB = async (query: Record<string, unknown>) => {
 
 
 const trackOrderByTrackingId = async (identifier: string) => {
-  const query: any = {
+  const query: Record<string, unknown> = {
     $or: [
       { trackingId: identifier },
       { transactionId: identifier },
@@ -396,7 +351,7 @@ const trackOrderByTrackingId = async (identifier: string) => {
 
   // Check if identifier is a valid MongoDB ObjectId
   if (identifier.match(/^[0-9a-fA-F]{24}$/)) {
-    query.$or.push({ _id: identifier });
+    (query.$or as Array<Record<string, unknown>>).push({ _id: identifier });
   }
 
   const result = await Order.findOne(query)
@@ -412,7 +367,7 @@ const trackOrderByTrackingId = async (identifier: string) => {
     });
 
   if (result) {
-    (result as any).invoiceLink = `${config.live_url_server}/api/orders/invoice/${result._id}`;
+    (result as unknown as { invoiceLink: string }).invoiceLink = `${config.live_url_server}/api/v1/orders/invoice/${result._id}`;
   }
 
   return result;

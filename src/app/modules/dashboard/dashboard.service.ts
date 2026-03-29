@@ -297,7 +297,7 @@ const calculateProgress = (current: number, prev: number) => {
 
 const AdminStatisticsFromDB = async (filter: DashboardFilter) => {
   // ==== Base Match ====
-  const match: any = {
+  const match: Record<string, unknown> = {
     status: {
       $in: ["PENDING", "UNSHIPPED", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"],
     },
@@ -576,7 +576,7 @@ export const UserStatisticsFromDB = async (
   if (!user) {
     throw new Error("User not found");
   }
-  const match: any = {
+  const match: Record<string, unknown> = {
     user: user._id,
     status: { $ne: "CANCELLED" }, // exclude cancelled
   };
@@ -770,7 +770,14 @@ export const UserStatisticsFromDB = async (
     },
   ]);
 
-  const foodWiseMap: Record<string, any> = {};
+  interface FoodWiseItem {
+    foodName: string;
+    categoryName: string;
+    totalOrders: number;
+    totalSpend: number;
+  }
+
+  const foodWiseMap: Record<string, FoodWiseItem> = {};
   if (totals[0]?.foodWise) {
     for (const food of totals[0].foodWise) {
       if (!foodWiseMap[food.foodId]) {
@@ -829,7 +836,7 @@ const topSellingFoodsFromDB = async (filter?: TimeFilter) => {
     }
   }
 
-  const matchStage: any = {
+  const matchStage: Record<string, unknown> = {
     paymentStatus: { $in: [PAYMENT_STATUS.PAID, PAYMENT_STATUS.SUCCEEDED] },
   };
 

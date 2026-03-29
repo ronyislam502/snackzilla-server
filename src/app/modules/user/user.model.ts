@@ -99,10 +99,9 @@ const userSchema = new Schema<TUser, UserModel>(
 );
 
 userSchema.pre("save", async function (next) {
-  const user = this;
-  if (user.password) {
-    user.password = await bcrypt.hash(
-      user.password,
+  if (this.password) {
+    this.password = await bcrypt.hash(
+      this.password,
       Number(config.bcrypt_salt_rounds)
     );
   }

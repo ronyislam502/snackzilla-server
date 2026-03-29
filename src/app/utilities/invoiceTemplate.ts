@@ -17,9 +17,9 @@ export const generateInvoiceHTML = (order: TOrder, customer: TUser) => {
     : "Address not provided";
 
 
-  const foodItems = foods
+  const foodItems = (foods as unknown as { food: { image: string; name: string; description?: string; price: number }; quantity: number }[])
     .map(
-      (item: any, index: number) => `
+      (item, index: number) => `
 <tr>
 
 <td style="text-align:center">${index + 1}</td>

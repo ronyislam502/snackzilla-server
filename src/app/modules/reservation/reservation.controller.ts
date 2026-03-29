@@ -5,7 +5,7 @@ import sendResponse from '../../utilities/sendResponse';
 import { ReservationService } from './reservation.service';
 
 const createReservation = catchAsync(async (req: Request, res: Response) => {
-  const user = req.user as any;
+  const user = req.user as { _id: string };
   const result = await ReservationService.createReservation({
     ...req.body,
     user: user?._id,

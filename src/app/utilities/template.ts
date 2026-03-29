@@ -14,14 +14,16 @@ export const paymentSuccessTemplate = async (
     // Food items as list
     const foodList = order.foods
       .map(
-        (item: any) =>
-          `<li style="margin-bottom:15px; display:flex; align-items:center;">
-             <img src="${item.food.image}" alt="${item.food.name}" width="50" height="50" style="border-radius:5px; margin-right:15px;"/>
+        (item) => {
+          const populatedItem = item as unknown as { food: { image: string; name: string; price: number }; quantity: number };
+          return `<li style="margin-bottom:15px; display:flex; align-items:center;">
+             <img src="${populatedItem.food.image}" alt="${populatedItem.food.name}" width="50" height="50" style="border-radius:5px; margin-right:15px;"/>
              <div>
-               <strong>${item.food.name}</strong> x${item.quantity}<br/>
-               $${(item.food.price * item.quantity).toFixed(2)}
+               <strong>${populatedItem.food.name}</strong> x${populatedItem.quantity}<br/>
+               $${(populatedItem.food.price * populatedItem.quantity).toFixed(2)}
              </div>
-           </li>`
+           </li>`;
+        }
       )
       .join("");
 
@@ -110,9 +112,9 @@ export const paymentEmailTemplate = async (order: TOrder) => {
         <p>Hi ${customer?.name},</p>
         <p>Your payment has been received. You can now download your invoice using the link below:</p>
         
-        ${(order as any).invoiceLink ? `
+        ${(order as { invoiceLink?: string }).invoiceLink ? `
           <div style="margin: 30px 0;">
-            <a href="${(order as any).invoiceLink}" style="display:inline-block; padding:12px 25px; background:#1e3a8a; color:#fff; text-decoration:none; border-radius:5px; font-weight:bold; font-size: 16px;">Download Your Invoice</a>
+            <a href="${(order as { invoiceLink?: string }).invoiceLink}" style="display:inline-block; padding:12px 25px; background:#1e3a8a; color:#fff; text-decoration:none; border-radius:5px; font-weight:bold; font-size: 16px;">Download Your Invoice</a>
           </div>
         ` : "<p>Preparing your invoice. Please check back soon.</p>"}
         

@@ -1,5 +1,8 @@
 import { Server, Socket } from "socket.io";
 import { ChatServices } from "../modules/chat/chat.service";
+import { Chat } from "../modules/chat/chat.model";
+import { User } from "../modules/user/user.model";
+import { OrderServices } from "../modules/order/order.service";
 
 let io: Server;
 
@@ -46,20 +49,19 @@ export const chatSocket = (socketIo: Server) => {
 
           // Notification Logic
           try {
-            const { Chat } = require("../modules/chat/chat.model");
-            require("../modules/user/user.model");
             const chat = await Chat.findById(data.chatId).populate("participants", "role name");
             if (chat) {
-              const sender = chat.participants.find((p: any) => p._id.toString() === data.senderId);
-              const receiver = chat.participants.find((p: any) => p._id.toString() !== data.senderId);
+              const participants = chat.participants as unknown as { _id: { toString(): string }; role: string; name: string }[];
+              const sender = participants.find((p) => p._id.toString() === data.senderId);
+              const receiver = participants.find((p) => p._id.toString() !== data.senderId);
               if (sender && receiver) {
-                  const notifSenderName = (sender as any).name || "Someone";
-                  if ((sender as any).role === "USER") {
+                  const notifSenderName = sender.name || "Someone";
+                  if (sender.role === "USER") {
                       console.log("Emitting notification to admin");
                       io.to("admin").emit("notification", {
                           message: `New message from ${notifSenderName}`
                       });
-                  } else if ((sender as any).role === "ADMIN") {
+                  } else if (sender.role === "ADMIN") {
                       console.log("Emitting notification to user:", `user-${receiver._id.toString()}`);
                       io.to(`user-${receiver._id.toString()}`).emit("notification", {
                           message: `New message from Admin`
@@ -90,9 +92,8 @@ export const chatSocket = (socketIo: Server) => {
     socket.on("initiate-chat", async (data: { userId: string; adminId?: string }) => {
       let adminId = data.adminId;
       if (!adminId) {
-        const { User } = require("../modules/user/user.model");
         const admin = await User.findOne({ role: "ADMIN" });
-        adminId = admin?._id;
+        adminId = admin?._id?.toString() as string;
       }
       const chat = await ChatServices.getOrCreateChat(data.userId, adminId as string);
       socket.emit("chat-initiated", chat);
@@ -100,38 +101,31 @@ export const chatSocket = (socketIo: Server) => {
 
     // Get all users (customers) for admin
     socket.on("get-users", async () => {
-      const { User } = require("../modules/user/user.model");
       const users = await User.find({ role: "USER" }).select("name email avatar phone address");
       socket.emit("all-users", users);
     });
 
     // Get user's orders
     socket.on("get-my-orders", async (data: { email: string; page?: number; limit?: number }) => {
-      const { OrderServices } = require("../modules/order/order.service");
       const result = await OrderServices.myOrdersByEmail(data.email, { page: data.page, limit: data.limit });
       socket.emit("my-orders", result);
     });
 
     // Get order details for tracking
     socket.on("get-order-details", async (orderId: string) => {
-      const { OrderServices } = require("../modules/order/order.service");
       const order = await OrderServices.singleOrderFromDB(orderId);
       socket.emit("order-details", order);
     });
 
     // Admin: Get orders by status
     socket.on("get-orders-by-status", async (data: { status: string; page?: number; limit?: number }) => {
-      const { Order } = require("../modules/order/order.model");
-      const { OrderServices } = require("../modules/order/order.service");
-      const query: any = { status: data.status };
-      const result = await OrderServices.getAllOrdersFromDB({ status: data.status, page: data.page, limit: data.limit });
+      const result = await OrderServices.allOrdersFromDB({ status: data.status, page: data.page, limit: data.limit });
       socket.emit("orders-list", { status: data.status, ...result });
     });
 
     // Admin: Update order status & Tracking ID
     socket.on("update-order-status", async (data: { id: string; status: string; trackingId?: string }) => {
-      const { OrderServices } = require("../modules/order/order.service");
-      const updateData: any = { status: data.status };
+      const updateData: Record<string, unknown> = { status: data.status };
       if (data.trackingId) {
         updateData.trackingId = data.trackingId;
       }

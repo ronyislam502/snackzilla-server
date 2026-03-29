@@ -1,4 +1,3 @@
-import express, { NextFunction, Request, Response } from "express";
 import { AuthControllers } from "./auth.controller";
 import {
   validateRequest,
@@ -9,8 +8,9 @@ import auth from "../../middlewares/auth";
 import { USER_ROLE } from "../user/user.const";
 import passport from "passport";
 import config from "../../config";
+import { Router } from "express";
 
-const router = express.Router();
+const router =Router();
 
 router.post(
   "/login",
@@ -42,12 +42,6 @@ router.post("/forget-password", AuthControllers.forgetPassword);
 
 router.post("/reset-password", AuthControllers.resetPassword);
 
-// router.get(
-//   "/google",
-//   passport.authenticate("google", {
-//     scope: ["profile", "email"],
-//   })
-// );
 
 router.get("/google", (req, res, next) => {
   const redirect = (req.query.redirect as string) || "/"; // frontend path
@@ -68,13 +62,7 @@ router.get(
 );
 
 
-// router.get("/google", async (req: Request, res: Response, next: NextFunction) => {
-//     // const redirect = req.query.redirect || "/"
-//     passport.authenticate("google", { scope: ["profile", "email"]})(req, res, next)
-// })
 
-// // api/v1/auth/google/callback?state=/booking
-// router.get("/google/callback", passport.authenticate("google", { failureRedirect: `${config.client_live_url}/login?error=There is some issues with your account. Please contact with out support team!` }), AuthControllers.googleAuth)
 
 
 export const AuthRoutes = router;

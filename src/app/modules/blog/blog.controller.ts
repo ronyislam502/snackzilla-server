@@ -1,7 +1,6 @@
 import httpStatus from "http-status";
 import catchAsync from "../../utilities/catchAsync";
 import sendResponse from "../../utilities/sendResponse";
-import { FoodServices } from "../food/food.service";
 import { TImageFile } from "../../interface/image.interface";
 import { BlogServices } from "./blog.service";
 
