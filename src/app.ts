@@ -35,8 +35,8 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: [config.client_url as string],
-    // credentials: true,
+    origin: [config.client_url as string , "http://localhost:3000", "http://localhost:3001"],
+    credentials: true,
   })
 );
 
