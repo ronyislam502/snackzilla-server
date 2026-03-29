@@ -6,7 +6,7 @@ import auth from "../../middlewares/auth";
 const router = Router();
 
 router.post(
-  "/confirm",
+  "/confirm",auth(USER_ROLE.USER),
   PaymentControllers.confirmPayment
 );
 

@@ -29,7 +29,7 @@ const confirmPaymentIntoDB = async (transactionId: string, status: string) => {
         .populate({ path: "foods.food", select: "name price image" });
 
       if (order?.user) {
-        const customer: any = await User.findById(order?.user);
+        const customer = await User.findById(order?.user);
         
         // Generate PDF Buffer
         const pdfBuffer = await generateInvoicePDF(order);
@@ -54,7 +54,7 @@ const confirmPaymentIntoDB = async (transactionId: string, status: string) => {
 
             setTimeout(async () => {
               try {
-                await Order.findByIdAndUpdate(order?._id, {
+                await Order.findByIdAndUpdate((order as any)?._id, {
                   status: ORDER_STATUS.DELIVERED,
                   $push: { statusHistory: { status: ORDER_STATUS.DELIVERED, updatedAt: new Date() } }
                 });
