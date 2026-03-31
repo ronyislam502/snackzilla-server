@@ -5,6 +5,7 @@ import { TFood } from "./food.interface";
 import { TImageFile } from "../../interface/image.interface";
 import { Food } from "./food.model";
 import QueryBuilder from "../../builder/queryBuilder";
+import config from "../../config";
 
 
 const createFoodIntoDB = async (image: TImageFile, payload: TFood) => {
