@@ -16,83 +16,127 @@ export const paymentSuccessTemplate = async (
       .map(
         (item) => {
           const populatedItem = item as unknown as { food: { image: string; name: string; price: number }; quantity: number };
-          return `<li style="margin-bottom:15px; display:flex; align-items:center;">
-             <img src="${populatedItem.food.image}" alt="${populatedItem.food.name}" width="50" height="50" style="border-radius:5px; margin-right:15px;"/>
-             <div>
-               <strong>${populatedItem.food.name}</strong> x${populatedItem.quantity}<br/>
-               $${(populatedItem.food.price * populatedItem.quantity).toFixed(2)}
-             </div>
-           </li>`;
+          return `
+            <div style="display: flex; align-items: center; gap: 16px; padding: 12px; background: #111; border-radius: 12px; margin-bottom: 12px; border: 1px solid #1a1a1a;">
+              <img src="${populatedItem.food.image}" alt="${populatedItem.food.name}" width="60" height="60" style="border-radius: 10px; object-fit: cover;"/>
+              <div style="flex: 1;">
+                <div style="color: #fff; font-weight: 600; font-size: 16px;">${populatedItem.food.name}</div>
+                <div style="color: #b3b3b3; font-size: 14px;">Qty: ${populatedItem.quantity}</div>
+              </div>
+              <div style="color: #fff; font-weight: 700; font-size: 16px;">
+                $${(populatedItem.food.price * populatedItem.quantity).toFixed(2)}
+              </div>
+            </div>`;
         }
       )
       .join("");
 
     orderDetailsHtml = `
-      <p>Hi ${customer?.name},</p>
-      <p>Your payment has been ${status === "failed" ? "unsuccessful" : "successful"}. Here are the order details:</p>
-      <ul style="list-style:none; padding:0; margin:0 0 20px 0;">
-        ${foodList}
-      </ul>
-      <p><b>Total Price:</b> $${order.totalPrice.toFixed(2)}</p>
-      <p><b>Tax (10%):</b> $${order.tax.toFixed(2)}</p>
-      <p><b>Grand Total:</b> $${order.grandAmount.toFixed(2)}</p>
-      <p><b>OrderNo:</b> ${order.transactionId}</p>
-      ${order.invoiceLink ? `<p><a href="${order.invoiceLink}" target="_blank" style="display:inline-block; margin-top:10px; padding:8px 15px; background:#1e3a8a; color:#fff; text-decoration:none; border-radius:5px; font-weight:bold;">Download Invoice</a></p>` : ""}
+      <div style="text-align: left; margin-top: 32px;">
+        <h3 style="color: #fff; font-size: 18px; margin-bottom: 16px; border-bottom: 1px solid #1a1a1a; padding-bottom: 8px;">Order Details</h3>
+        <p style="color: #b3b3b3; margin-bottom: 20px;">Hi ${customer?.name}, your payment was ${status === "failed" ? "unsuccessful" : "successful"}.</p>
+        <div style="margin-bottom: 24px;">
+          ${foodList}
+        </div>
+        
+        <div style="background: #111; padding: 20px; border-radius: 12px; border: 1px solid #1a1a1a;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #b3b3b3;">
+            <span>Subtotal</span>
+            <span>$${order.totalPrice.toFixed(2)}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 12px; color: #b3b3b3;">
+            <span>Tax (10%)</span>
+            <span>$${order.tax.toFixed(2)}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; border-top: 1px solid #1a1a1a; pt: 12px; margin-top: 12px; font-weight: 800; font-size: 20px; color: ${status === "failed" ? "#ff3333" : "#00ff80"};">
+            <span>Grand Total</span>
+            <span>$${order.grandAmount.toFixed(2)}</span>
+          </div>
+        </div>
+
+        <p style="color: #666; font-size: 13px; margin-top: 20px; text-align: center;">Transaction ID: ${order.transactionId}</p>
+        
+        ${order.invoiceLink ? `
+          <div style="margin-top: 24px; text-align: center;">
+            <a href="${order.invoiceLink}" target="_blank" style="display: inline-block; padding: 12px 24px; border: 1px solid #333; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">Download Invoice PDF</a>
+          </div>` : ""}
+      </div>
     `;
   }
 
+  const isFailed = status === "failed";
+  const themeColor = isFailed ? "#ff3333" : "#00ff80";
+
   return `
+    <!DOCTYPE html>
     <html>
       <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
           body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #000;
+            color: #fff;
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            line-height: 1.5;
           }
-          .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
+          .main-container {
             max-width: 600px;
+            margin: 40px auto;
+            background-color: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 24px;
+            padding: 48px;
+            text-align: center;
           }
-          .failed {
-            color: #f44336;
+          .status-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
           }
-          .success {
-            color: #4CAF50;
+          .title {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: ${themeColor};
           }
-          .redirect-link {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            border-radius: 5px;
+          .subtitle {
+            color: #b3b3b3;
+            font-size: 16px;
+            margin-bottom: 32px;
+          }
+          .cta-button {
+            display: block;
+            margin-top: 40px;
+            padding: 18px;
+            background-color: ${themeColor};
+            color: #000;
             text-decoration: none;
-            color: #fff;
-          }
-          .failed-link {
-            background-color: #f44336;
-          }
-          .success-link {
-            background-color: #4CAF50;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 16px;
+            transition: opacity 0.2s;
           }
         </style>
       </head>
       <body>
-        <div class="container">
-          <h1 class="${status === "failed" ? "failed" : "success"}">
-            Payment ${status === "failed" ? "Failed" : "Successful"}
+        <div class="main-container">
+          <div class="status-icon">
+            ${isFailed ? "❌" : "✅"}
+          </div>
+          <h1 class="title">
+            Payment ${isFailed ? "Failed" : "Successful"}
           </h1>
+          <p class="subtitle">
+            ${isFailed ? "We couldn't process your payment. Please try again." : "Thank you for your purchase! Your order is being prepared."}
+          </p>
+          
           ${orderDetailsHtml}
-          <a href="${config?.client_live_url_page}" class="redirect-link ${status === "failed" ? "failed-link" : "success-link"}">
-            ${status === "failed" ? "Retry Payment" : "Explore more"}
+          
+          <a href="${config?.client_url}" class="cta-button">
+            ${isFailed ? "Retry Payment" : "Back to SnackZilla"}
           </a>
         </div>
       </body>
@@ -106,20 +150,26 @@ export const paymentEmailTemplate = async (order: TOrder) => {
   const customer = await User.findById(user);
 
   return `
-    <div style="font-family: Arial; padding:20px; background:#f4f4f4;">
-      <div style="max-width:600px; margin:auto; background:#fff; border-radius:8px; padding:30px; box-shadow:0 2px 8px rgba(0,0,0,0.1); text-align: center;">
-        <h2 style="color:#4CAF50;">Payment Successful 🎉</h2>
-        <p>Hi ${customer?.name},</p>
-        <p>Your payment has been received. You can now download your invoice using the link below:</p>
+    <div style="font-family: 'Inter', -apple-system, sans-serif; padding: 40px 20px; background: #000; color: #fff;">
+      <div style="max-width: 600px; margin: auto; background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 24px; padding: 48px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+        <div style="font-size: 64px; margin-bottom: 24px;">🎉</div>
+        <h2 style="color: #00ff80; font-size: 32px; font-weight: 800; margin-bottom: 8px;">Payment Received!</h2>
+        <p style="color: #b3b3b3; font-size: 16px; margin-bottom: 32px;">Hi ${customer?.name}, your snack delivery is being processed.</p>
         
+        <div style="background: #111; padding: 24px; border-radius: 16px; border: 1px solid #1a1a1a; text-align: left; margin: 32px 0;">
+          <p style="color: #fff; font-weight: 600; margin-bottom: 8px;">Order Reference</p>
+          <p style="color: #666; font-family: monospace; font-size: 14px; margin: 0;">${transactionId}</p>
+        </div>
+
         ${(order as { invoiceLink?: string }).invoiceLink ? `
-          <div style="margin: 30px 0;">
-            <a href="${(order as { invoiceLink?: string }).invoiceLink}" style="display:inline-block; padding:12px 25px; background:#1e3a8a; color:#fff; text-decoration:none; border-radius:5px; font-weight:bold; font-size: 16px;">Download Your Invoice</a>
+          <div style="margin: 40px 0;">
+            <a href="${(order as { invoiceLink?: string }).invoiceLink}" style="display: block; padding: 18px; background: #00ff80; color: #000; text-decoration: none; border-radius: 14px; font-weight: 800; font-size: 16px;">Download Your Invoice</a>
           </div>
-        ` : "<p>Preparing your invoice. Please check back soon.</p>"}
+        ` : `<p style="color: #666; font-size: 14px;">Preparing your invoice. We'll send it shortly.</p>`}
         
-        <p style="color: #718096; font-size: 12px; margin-top: 20px;">Order Reference: ${transactionId}</p>
-        <p>Thank you for ordering with SnackZilla!</p>
+        <p style="color: #444; font-size: 13px; margin-top: 32px;">
+          Thank you for choosing <strong>SnackZilla</strong>. Stay hungry!
+        </p>
       </div>
     </div>
   `;

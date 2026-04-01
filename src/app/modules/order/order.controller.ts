@@ -5,6 +5,7 @@ import { OrderServices } from "./order.service";
 import { getIo } from "../../socket/socket";
 
 const createOrder = catchAsync(async (req, res) => {
+
   const result = await OrderServices.createOrderIntoDB(req.body);
 
   if (result) {

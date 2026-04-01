@@ -13,7 +13,6 @@ import "./app/config/passport"
 import config from "./app/config";
 
 
-
 const app: Application = express();
 
 app.use(expressSession({
@@ -39,6 +38,7 @@ app.use(
     credentials: true,
   })
 );
+
 
 cron.schedule("*/5 * * * *", async () => {
   try {

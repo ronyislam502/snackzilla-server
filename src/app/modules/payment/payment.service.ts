@@ -58,7 +58,6 @@ const confirmPaymentIntoDB = async (transactionId: string, status: string) => {
                   status: ORDER_STATUS.DELIVERED,
                   $push: { statusHistory: { status: ORDER_STATUS.DELIVERED, updatedAt: new Date() } }
                 });
-                console.log(`Order ${(order as TPopulatedOrder)?._id} status updated to DELIVERED (Simulated)`);
               } catch (err) {
                 console.error("Simulation Delivery update error:", err);
               }

@@ -9,7 +9,7 @@ import { TPayment } from "./payment.interface";
 
 dotenv.config();
 
-export const initiatePayment = async (paymentData: TPayment) => {
+export const initiatePayment = async (paymentData: TPayment ,) => {
   const customer = await User.findById(paymentData?.user);
 
   const address = customer?.address
@@ -23,7 +23,7 @@ export const initiatePayment = async (paymentData: TPayment) => {
       tran_id: paymentData?.transactionId,
       success_url: `${config?.live_url_server}/api/v1/payments/confirm?transactionId=${paymentData?.transactionId}&status=success`,
       fail_url: `${config?.live_url_server}/api/v1/payments/confirm?status=failed`,
-      cancel_url: config.client_live_url_page,
+      cancel_url: config?.client_url,
       desc: "Merchant Registration Payment",
       amount: paymentData?.grandAmount,
       currency: "BDT",
@@ -40,6 +40,7 @@ export const initiatePayment = async (paymentData: TPayment) => {
       type: "json",
     });
 
+    
     return response?.data?.payment_url;
   } catch (err: any) {
     throw new AppError(httpStatus.FORBIDDEN, "Payment initiation failed!");
